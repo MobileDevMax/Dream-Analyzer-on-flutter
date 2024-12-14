@@ -1,0 +1,133 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Dream Analyzer',
+      home: DreamInputScreen(),
+    );
+  }
+}
+
+class Dream {
+  final String title;
+  final String description;
+
+  Dream({required this.title, required this.description});
+}
+
+class DreamInputScreen extends StatefulWidget {
+  @override
+  _DreamInputScreenState createState() => _DreamInputScreenState();
+}
+
+class _DreamInputScreenState extends State<DreamInputScreen> {
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final List<Dream> savedDreams = [];
+
+  void _analyzeDream() {
+    String title = titleController.text;
+    String description = descriptionController.text;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Analysis Result'),
+          content: Text('Title: $title\nDescription: $description'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  savedDreams.add(Dream(title: title, description: description));
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text('Save Dream'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _navigateToSavedDreams() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => SavedDreamsScreen(savedDreams: savedDreams),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Enter Your Dream'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.list),
+            onPressed: _navigateToSavedDreams,
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(labelText: 'Title'),
+            ),
+            TextField(
+              controller: descriptionController,
+              decoration: InputDecoration(labelText: 'Description'),
+            ),
+            SizedBox(height: 20), // Adds space between the TextFields and the button
+            ElevatedButton(
+              onPressed: _analyzeDream,
+              child: Text('Analyze Dream'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SavedDreamsScreen extends StatelessWidget {
+  final List<Dream> savedDreams;
+
+  SavedDreamsScreen({required this.savedDreams});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Saved Dreams'),
+      ),
+      body: ListView.builder(
+        itemCount: savedDreams.length,
+        itemBuilder: (context, index) {
+          return Card(
+            margin: EdgeInsets.all(8.0),
+            child: ListTile(
+              title: Text(savedDreams[index].title),
+              subtitle: Text(savedDreams[index].description),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
